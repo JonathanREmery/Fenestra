@@ -21,11 +21,11 @@ namespace Fenestra {
 
     Window::~Window() noexcept {
         DestroyWindow(this->hWnd);
-        UnregisterClass(this->windowClassName, this->hInstance);
+        UnregisterClassA(windowClassName, this->hInstance);
     }
 
     void Window::registerWindowClass() const noexcept {
-        WNDCLASS wc;
+        WNDCLASSA wc;
 
         wc.cbClsExtra = 0;
         wc.cbWndExtra = 0;
@@ -38,21 +38,18 @@ namespace Fenestra {
         wc.style = CS_OWNDC;
 
         if (this->iconPath != nullptr) {
-            std::wstring iconPathW(this->iconPath, this->iconPath + strlen(this->iconPath) + 1);
-            wc.hIcon = (HICON)LoadImage(nullptr, iconPathW.c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
+            wc.hIcon = (HICON)LoadImageA(nullptr, this->iconPath, IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
         } else {
             wc.hIcon = nullptr;
         }
 
-        RegisterClass(&wc);
+        RegisterClassA(&wc);
     }
 
     void Window::createWindow() noexcept {
-        std::wstring titleW(this->title, this->title + strlen(this->title) + 1);
-
-        this->hWnd = CreateWindow(
+        this->hWnd = CreateWindowA(
             this->windowClassName,
-            titleW.c_str(),
+            this->title,
             WS_OVERLAPPEDWINDOW,
             CW_USEDEFAULT,
             CW_USEDEFAULT,

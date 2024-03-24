@@ -1,2 +1,5 @@
 .vscode/*
 *.exe
+*.obj
+*.pdb
+ut

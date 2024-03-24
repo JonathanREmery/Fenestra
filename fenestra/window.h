@@ -8,7 +8,7 @@ namespace Fenestra {
 
     class Window {
         private:
-            static constexpr const wchar_t* windowClassName = L"FenestraWindowClass";
+            static constexpr const char* windowClassName = "FenestraWindowClass";
 
             const char* title;
             const int width;
