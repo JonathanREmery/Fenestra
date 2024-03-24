@@ -5,15 +5,15 @@
 namespace Fenestra {
     Window::Window(const char* title) noexcept : Window(title, 800, 600) {}
     Window::Window(const char* title, int width, int height) noexcept : Window(title, width, height, nullptr) {}
-    Window::Window(const char* title, int width, int height, const char* iconPath) noexcept : Window(title, width, height, iconPath, DefWindowProc) {}
+    Window::Window(const char* title, int width, int height, const char* iconPath) noexcept : Window(title, width, height, iconPath, nullptr) {}
 
-    Window::Window(const char* title, int width, int height, const char* iconPath, WNDPROC wndProc) noexcept :
+    Window::Window(const char* title, int width, int height, const char* iconPath, MESSAGE_HANDLER handleMessage) noexcept :
         title(title),
         width(width),
         height(height),
         iconPath(iconPath),
         hInstance(GetModuleHandle(nullptr)),
-        wndProc(wndProc)
+        handleMessage(handleMessage)
     {
         registerWindowClass();
         createWindow();
@@ -75,7 +75,11 @@ namespace Fenestra {
             SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pWnd));
             SetWindowLongPtr(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Window::wndProcThunk));
 
-            return pWnd->wndProc(hWnd, msg, wParam, lParam);
+            if (pWnd->handleMessage != nullptr) {
+                pWnd->handleMessage(msg, wParam, lParam);
+            }
+
+            return DefWindowProc(hWnd, msg, wParam, lParam);
         }
 
         return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -84,14 +88,14 @@ namespace Fenestra {
     LRESULT WINAPI Window::wndProcThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
         Window* const pWnd = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
-        return pWnd->wndProc(hWnd, msg, wParam, lParam);
+        if (pWnd->handleMessage != nullptr) {
+            pWnd->handleMessage(msg, wParam, lParam);
+        }
+
+        return DefWindowProc(hWnd, msg, wParam, lParam);
     }
 
-    void Window::setWindowProcedure(WNDPROC windowProcedure) noexcept {
-        this->wndProc = windowProcedure;
-    }
-
-    int Window::handleMessage() noexcept {
+    int Window::update() noexcept {
         MSG msg;
         int gResult = GetMessage(&msg, nullptr, 0, 0);
 
