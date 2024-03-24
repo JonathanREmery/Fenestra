@@ -6,7 +6,7 @@
 namespace Fenestra {
     class Window {
         private:
-            static constexpr LPCWSTR windowClassName = L"FenestraWindowClass";
+            static constexpr const wchar_t* windowClassName = L"FenestraWindowClass";
 
             const char* title;
             const int width;
@@ -21,7 +21,7 @@ namespace Fenestra {
 
             static LRESULT WINAPI wndProcSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
             static LRESULT WINAPI wndProcThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
-            
+
             WNDPROC wndProc;
         public:
             Window(const char* title) noexcept;
@@ -31,6 +31,8 @@ namespace Fenestra {
             ~Window() noexcept;
 
             void setWindowProcedure(WNDPROC windowProcedure) noexcept;
+
+            int handleMessage() noexcept;
     };
 }
 

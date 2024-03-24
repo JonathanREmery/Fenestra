@@ -12,19 +12,10 @@ LRESULT WINAPI wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexce
     return 0;
 }
 
-int main() {
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     Fenestra::Window window("Fenestra Window", 800, 600, nullptr, wndProc);
 
-    MSG msg;
-    BOOL gResult;
-    while ((gResult = GetMessage(&msg, nullptr, 0, 0) > 0)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
+    while (window.handleMessage()) {}
 
-    if (gResult == -1) {
-        return -1;
-    }
-
-    return msg.wParam;
+    return 0;
 }

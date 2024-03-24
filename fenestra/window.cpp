@@ -90,4 +90,18 @@ namespace Fenestra {
     void Window::setWindowProcedure(WNDPROC windowProcedure) noexcept {
         this->wndProc = windowProcedure;
     }
+
+    int Window::handleMessage() noexcept {
+        MSG msg;
+        int gResult = GetMessage(&msg, nullptr, 0, 0);
+
+        if (gResult <= 0) {
+            return 0;
+        }
+
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+
+        return 1;
+    }
 }
