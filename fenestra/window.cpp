@@ -1,4 +1,5 @@
 #include <string>
+#include <cmath>
 
 #include "window.h"
 
@@ -13,13 +14,19 @@ namespace Fenestra {
         height(height),
         iconPath(iconPath),
         hInstance(GetModuleHandle(nullptr)),
-        handleMessage(handleMessage)
+        handleMessage(handleMessage),
+        graphics(nullptr),
+        time(Time::getInstance())
     {
         registerWindowClass();
         createWindow();
     }
 
     Window::~Window() noexcept {
+        if (this->graphics != nullptr) {
+            delete this->graphics;
+        }
+
         DestroyWindow(this->hWnd);
         UnregisterClassA(windowClassName, this->hInstance);
     }
@@ -37,13 +44,24 @@ namespace Fenestra {
         wc.lpszMenuName = nullptr;
         wc.style = CS_OWNDC;
 
+        if (wc.hbrBackground == nullptr) {
+            MessageBoxA(nullptr, "Failed to set window HBR background!", "Error", MB_ICONERROR | MB_OK);
+        }
+
         if (this->iconPath != nullptr) {
             wc.hIcon = (HICON)LoadImageA(nullptr, this->iconPath, IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
+
+            if (wc.hIcon == nullptr) {
+                MessageBoxA(nullptr, "Failed to load icon!", "Error", MB_ICONERROR | MB_OK);
+            }
         } else {
             wc.hIcon = nullptr;
         }
 
-        RegisterClassA(&wc);
+        if (RegisterClassA(&wc) == 0) {
+            MessageBoxA(nullptr, "Failed to register window class!", "Error", MB_ICONERROR | MB_OK);
+            exit(-1);
+        }
     }
 
     void Window::createWindow() noexcept {
@@ -60,6 +78,13 @@ namespace Fenestra {
             this->hInstance,
             this
         );
+
+        if (this->hWnd == nullptr) {
+            MessageBoxA(nullptr, "Failed to create window!", "Error", MB_ICONERROR | MB_OK);
+            exit(-1);
+        }
+
+        this->graphics = new Graphics(this->hWnd);
 
         ShowWindow(hWnd, SW_SHOW);
     }
@@ -94,15 +119,21 @@ namespace Fenestra {
 
     int Window::update() noexcept {
         MSG msg;
-        int gResult = GetMessage(&msg, nullptr, 0, 0);
+        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+            if (msg.message == WM_QUIT) {
+                return 0;
+            }
 
-        if (gResult <= 0) {
-            return 0;
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
         }
 
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-
+        this->graphics->clearBuffer(
+            sin((this->time->getElapsedTime() / 1000.0) + (3.14 / 2.0)) * 0.5f + 0.5f,
+            sin(this->time->getElapsedTime() / 1000.0) * 0.5f + 0.5f,
+            sin((this->time->getElapsedTime() / 1000.0) - (3.14 / 2.0)) * 0.5f + 0.5f
+        );
+        this->graphics->endFrame();
         return 1;
     }
 }

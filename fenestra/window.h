@@ -2,6 +2,8 @@
 #define WINDOW_H
 
 #include "win.h"
+#include "graphics.h"
+#include "time.h"
 
 namespace Fenestra {
     typedef void (*MESSAGE_HANDLER)(unsigned int, unsigned long long, long long);
@@ -17,6 +19,9 @@ namespace Fenestra {
 
             const HINSTANCE hInstance;
             HWND hWnd;
+
+            Graphics* graphics;
+            Time* time;
 
             void registerWindowClass() const noexcept;
             void createWindow() noexcept;
